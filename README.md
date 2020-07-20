@@ -1,6 +1,6 @@
 # Online Math Solver Example
 
-This project is an intentionally incomplete online math solver.
+This project is an intentionally incomplete online math solver. Edited by Alison, Leah, Jenna
 
 ## Motivation
 
