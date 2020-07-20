@@ -41,3 +41,5 @@ python solver_website.py
 ```
 
 Then open your web browser to the server, likely `localhost:5000`.
+
+Alison edited 7/20
