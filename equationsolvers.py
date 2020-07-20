@@ -7,11 +7,25 @@ from textwrap import dedent
 
 # Linear Equation Solver
 def linear_solver(sub):
-    r"""
+    r"""Linear Equation Checker/Solver.
 
+    Checks whether a given string is a linear equation in one variable,
+    and if so, returns an explanation of how to solve it.
 
+    Parameters
+    ----------
 
-    EXAMPLES
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as linear,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
     --------
 
     >>> linear_solver("")
