@@ -194,16 +194,32 @@ def linear_solver(sub):
 
 
 # Exponential
+# Examples:
+#     "e^x-5=2"
+#     "1+2e^(x-1)=5"
+#     "1-2e^(x-1)=5"
 def exponential_solver(sub):
     return False
 
 
 # Logarithm
+# Examples:
+#     "ln(x)=3"
+#     "ln(2x)-1=4"
+#     "ln(3x)+3=2"
+#     "ln(3a+1)-1=3"
+# As a challenge,
+# You can also choose to support other formats of log
 def logarithm_solver(sub):
     return False
 
 
 # Square Roots
+# Examples:
+#     "sqrt(x+1)=2"
+#     "2sqrt(2x-3)+3=5"
+#     "1-2sqrt(2-x)=3"
+# As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
     return False
 
