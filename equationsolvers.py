@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from sympy import Eq, latex
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
