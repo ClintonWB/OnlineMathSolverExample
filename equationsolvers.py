@@ -7,7 +7,7 @@ from textwrap import dedent
 
 # Linear Equation Solver
 def linear_solver(sub):
-    """Linear Equation Checker/Solver.
+    r"""Linear Equation Checker/Solver.
 
     Checks whether a given string is a linear equation in one variable,
     and if so, returns an explanation of how to solve it.
@@ -229,14 +229,8 @@ def logarithm_solver(sub):
     return False
 
 
-# Square Roots
-# Examples:
-#     "sqrt(x+1)=2"
-#     "2sqrt(2x-3)+3=5"
-#     "1-2sqrt(2-x)=3"
-# As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
-    """Square Root Checker/Solver.
+    r"""Square Root Checker/Solver.
 
     Checks whether a given string is a square root in one variable,
     and if so, returns an explanation of how to solve it.
@@ -257,23 +251,99 @@ def square_root_solver(sub):
     Examples
     --------
 
-    >>> linear_solver("")
+    >>> square_root_solver("")
     False
 
-    >>> linear_solver("something abstract")
+    >>> square_root_solver("something abstract")
     False
 
-    >>> linear_solver("x+1")
+    >>> square_root_solver("x+1")
     False
 
-    >>> linear_solver("x**2+1=1")
+    >>> square_root_solver("x**2+1=1")
     False
 
-    >>> print(linear_solver("sqrt(x+1) = 2"))
+    >>> print(square_root_solver("sqrt(x+1) = 2"))
     Let's solve the equation:
     \[
-        \sqrt(x + 1) = 2
+        \sqrt{x + 1} = 2
     \]
+    The square root, $\sqrt{x + 1}$, is isolated on the left.
+    Square both sides.
+    \begin{align*}
+        \sqrt{x + 1}^2 &= 2^2\\
+        x + 1 &= 4
+    \end{align*}
+    We subtract 1 from both sides:
+    \begin{align*}
+        (x + 1)-(1) &= 4-(1) \\
+        x &= 3
+    \end{align*}
+    The equation is in the form $x = 3$;
+    That is, the value of $x$ is $3$.
+
+    >>> print(square_root_solver("2sqrt(2x-3)+3=5"))
+    Let's solve the equation:
+    \[
+        2 \sqrt{2 x - 3} + 3 = 5
+    \]
+    First, we subtract 3 from both sides:
+    \begin{align*}
+        (2 \sqrt{2 x - 3} + 3)-(3) &= 5-(3) \\
+        2 \sqrt{2 x - 3} &= 2
+    \end{align*}
+    We have just one term on the left:
+    The square root $2 \sqrt{2 x - 3}$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 \sqrt{2 x - 3} }{ 2 } &=
+        \frac{ 2 }{ 2 } \\
+        \sqrt{2 x - 3} &= 1
+    \end{align*}
+    The square root, $\sqrt{2 x - 3}$, is isolated on the left.
+    Square both sides.
+    \begin{align*}
+        \sqrt{2 x - 3}^2 &= 1^2\\
+        2 x - 3 &= 1
+    \end{align*}
+    We subtract -3 from both sides:
+    \begin{align*}
+        (2 x - 3)-(-3) &= 1-(-3) \\
+        2 x &= 4
+    \end{align*}
+    We have just one term on the left:
+    The variable $x$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 x }{ 2 } &=
+        \frac{ 4 }{ 2 } \\
+        x &= 2
+    \end{align*}
+    The equation is in the form $x = 2$;
+    That is, the value of $x$ is $2$.
+
+    >>> print(square_root_solver("1-2sqrt(2-x)=3"))
+    Let's solve the equation:
+    \[
+        1 - 2 \sqrt{2 - x} = 3
+    \]
+    First, we subtract 1 from both sides:
+    \begin{align*}
+        (1 - 2 \sqrt{2 - x})-(1) &= 3-(1) \\
+        - 2 \sqrt{2 - x} &= 2
+    \end{align*}
+    We have just one term on the left:
+    The square root $- 2 \sqrt{2 - x}$ with coefficient $-2$.
+    Divide both sides by $-2$:
+    \begin{align*}
+        \frac{ - 2 \sqrt{2 - x} }{ -2 } &=
+        \frac{ 2 }{ -2 } \\
+        \sqrt{2 - x} &= -1
+    \end{align*}
+    The right hand side is -1, a negative number. Thus, there is no solution.
+
+
+
     """
     # Check if SymPy can parse the expression as an equation
     try:
@@ -364,7 +434,7 @@ def square_root_solver(sub):
     new_lhs = lhs**2
 
     explanation += dedent("""\
-    We have isolated the square root, ${old_lhs}$ on the left.
+    The square root, ${old_lhs}$, is isolated on the left.
     Square both sides.
     \\begin{{align*}}
         {old_lhs}^2 &= {old_rhs}^2\\\\
@@ -389,7 +459,7 @@ def square_root_solver(sub):
         new_rhs = rhs - left_constant
         new_lhs = lhs - left_constant
         explanation += dedent("""\
-        Again, we subtract {left_constant} from both sides:
+        We subtract {left_constant} from both sides:
         \\begin{{align*}}
             ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
             {new_lhs} &= {new_rhs}
@@ -432,10 +502,7 @@ def square_root_solver(sub):
         value = latex(rhs)))
 
 
-
     return explanation
-
-print(square_root_solver("2sqrt(2x-3)+3=5"))
 
 
 # Quadratic Equation Solver
