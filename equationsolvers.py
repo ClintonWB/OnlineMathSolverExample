@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sympy import Eq, latex
+import sympy
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
     implicit_multiplication, standard_transformations)
