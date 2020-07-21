@@ -245,6 +245,49 @@ def square_root_solver(sub):
 #    "y**2+1=0"
 #    "z**2+3z+2=0"
 def quadratic_solver(sub):
+    r"""Quadratic Equation Checker/Solver.
+
+    Checks whether a given string is a linear equation in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as linear,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> quadratic_solver("")
+    False
+
+    >>> quadratic_solver("something abstract")
+    False
+
+    >>> quadratic_solver("x+1")
+    False
+
+    >>> print(quadratic_solver("x**2+1=1"))
+    Not Yet Implemented
+    
+    >>> print(quadratic_solver("x**2+2x+1=0"))
+    Not Yet Implemented
+    
+    >>> print(quadratic_solver("y**2+1=0"))
+    Not Yet Implemented
+    
+    >>> print(quadratic_solver("z**2+3z+2=0"))
+    Not Yet Implemented    
+    
+    """
     return False
 
 
