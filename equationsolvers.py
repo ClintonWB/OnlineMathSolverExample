@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sympy import Eq, latex
+import sympy
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
     implicit_multiplication, standard_transformations)
@@ -396,4 +396,6 @@ equation_solvers = (linear_solver,
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()
+    doctest.testmod( )
+
+logarithm_solver("ln(x)=3")
