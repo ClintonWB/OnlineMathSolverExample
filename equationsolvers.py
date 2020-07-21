@@ -227,6 +227,109 @@ def exponential_solver(sub):
 # As a challenge,
 # You can also choose to support other formats of log
 def logarithm_solver(sub):
+    r"""Logarithmic Equation Checker/Solver.
+
+    Checks whether a given string is a logarithmic equation in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as logarithmic,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> logarithm_solver("")
+    False
+
+    >>> logarithm_solver("something abstract")
+    False
+
+    >>> logarithm_solver("2x+1=7")
+    False
+
+    >>> print(logarithm_solver("ln(x)=3"))
+    Let's solve the equation:
+    \[
+        \log{\left(x \right)} = 3
+    \]
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \begin{align*}
+        e^\log{\left(x \right)} &=e^3 \\
+        x &= e^{3}
+    \end{align*}
+    The equation is in the form $x = e^{3}$;
+    That is, the value of $x$ is $e^{3}$.
+
+    >>> print(logarithm_solver("ln(3a+1)-1=3"))
+    Let's solve the equation:
+    \[
+        \log{\left(3 a + 1 \right)} - 1 = 3
+    \]
+    First, we subtract -1 from both sides:
+    \begin{align*}
+        (\log{\left(3 a + 1 \right)} - 1)-(-1) &= 3-(-1) \\
+        \log{\left(3 a + 1 \right)} &= 4
+    \end{align*}
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \begin{align*}
+        e^\log{\left(3 a + 1 \right)} &=e^4 \\
+        3 a + 1 &= e^{4}
+    \end{align*}
+    We now solve the resutling linear equation. We subtract 1 from both sides:
+    \begin{align*}
+        (3 a + 1)-(1) &= e^{4}-(1) \\
+        3 a &= -1 + e^{4}
+    \end{align*}
+    We have just one term on the left:
+    The variable $a$ with coefficient $3$.
+    Divide both sides by $3$:
+    \begin{align*}
+        \frac{ 3 a }{ 3 } &=
+        \frac{ -1 + e^{4} }{ 3 } \\
+        a &= - \frac{1}{3} + \frac{e^{4}}{3}
+    \end{align*}
+    The equation is in the form $a = - \frac{1}{3} + \frac{e^{4}}{3}$;
+    That is, the value of $a$ is $- \frac{1}{3} + \frac{e^{4}}{3}$.
+
+    >>> print(logarithm_solver("ln(2x)-1=4"))
+    Let's solve the equation:
+    \[
+        \log{\left(2 x \right)} - 1 = 4
+    \]
+    First, we subtract -1 from both sides:
+    \begin{align*}
+        (\log{\left(2 x \right)} - 1)-(-1) &= 4-(-1) \\
+        \log{\left(2 x \right)} &= 5
+    \end{align*}
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \begin{align*}
+        e^\log{\left(2 x \right)} &=e^5 \\
+        2 x &= e^{5}
+    \end{align*}
+    We have just one term on the left:
+    The variable $x$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 x }{ 2 } &=
+        \frac{ e^{5} }{ 2 } \\
+        x &= \frac{e^{5}}{2}
+    \end{align*}
+    The equation is in the form $x = \frac{e^{5}}{2}$;
+    That is, the value of $x$ is $\frac{e^{5}}{2}$.
+    """
     # Check if SymPy can parse the expression as an equation
     try:
         expr = parse_expr(sub,
