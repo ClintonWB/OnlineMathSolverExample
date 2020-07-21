@@ -305,9 +305,9 @@ def logarithm_solver(sub):
     rhs = new_rhs
 
     coeff = lhs.coeff(x)
-    new_left_constant = lhs - coeff*x
+    left_constant = lhs - coeff*x
 
-    if not new_left_constant.is_zero:
+    if not left_constant.is_zero:
         new_rhs = rhs - left_constant
         new_lhs = lhs - left_constant
         explanation += dedent("""\
