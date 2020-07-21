@@ -7,7 +7,7 @@ from textwrap import dedent
 
 # Linear Equation Solver
 def linear_solver(sub):
-    r"""Linear Equation Checker/Solver.
+    """Linear Equation Checker/Solver.
 
     Checks whether a given string is a linear equation in one variable,
     and if so, returns an explanation of how to solve it.
@@ -236,7 +236,76 @@ def logarithm_solver(sub):
 #     "1-2sqrt(2-x)=3"
 # As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
+    """Square Root Checker/Solver.
+
+    Checks whether a given string is a square root in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as square root,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> linear_solver("")
+    False
+
+    >>> linear_solver("something abstract")
+    False
+
+    >>> linear_solver("x+1")
+    False
+
+    >>> linear_solver("x**2+1=1")
+    False
+
+    >>> print(linear_solver("sqrt(x+1) = 2"))
+    Let's solve the equation:
+    \[
+        \sqrt(x + 1) = 2
+    \]
+    """
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a square root equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if not (expr.lhs.diff(x)**(-2)).diff(x).is_constant():
+        return False
+
+
+
     return False
+
+
+
 
 
 # Quadratic Equation Solver
