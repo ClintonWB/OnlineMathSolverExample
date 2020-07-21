@@ -255,8 +255,43 @@ def quadratic_solver(sub):
 # You can do it in only two dimensions if you want,
 # or challenge yourself to do it for more.
 def system_of_linear_equations_solver(sub):
-    return False
+    #separate the equations at the comma
+    eqns=sub.split(",")
+    if len(eqns) != 2:
+        return False
+    # Check if SymPy can parse the expressions as equations
+    try:
+        expr=[]
+        for i in eqns:
+            expr.append(parse_expr(i,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs)))
+    except (SyntaxError, ValueError):
+        return False
 
+    # Verify the structure of the equations
+
+    # Check if the expressions are in 2 variables
+    variables=set()
+    for i in expr:
+        variables.update(i.free_symbols)
+        if len(i.free_symbols) != 2:
+            return False
+    if len(variables) != 2:
+        return False
+    x,y, = variables
+
+    # Check if they are linear equations
+    for i in expr:
+        if not isinstance(i, Eq):
+            return False
+        if not i.rhs.is_constant():
+            return False
+        if not i.lhs.diff(x).is_constant():
+            return False
+        if not i.lhs.diff(y).is_constant():
+            return False
 
 # Export solvers as a list
 equation_solvers = (linear_solver,
