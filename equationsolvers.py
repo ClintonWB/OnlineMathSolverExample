@@ -304,6 +304,27 @@ def logarithm_solver(sub):
     lhs = new_lhs
     rhs = new_rhs
 
+    coeff = lhs.coeff(x)
+    new_left_constant = lhs - coeff*x
+
+    if not new_left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        We now solve the resutling linear equation. We subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
     if not coeff == 1:
         new_rhs = rhs/coeff
         new_lhs = lhs/coeff
