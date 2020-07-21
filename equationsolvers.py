@@ -265,9 +265,7 @@ def logarithm_solver(sub):
     """.format(expression=latex(expr)))
     lhs = expr.lhs
     rhs = expr.rhs
-    lhs_diff = lhs.diff(x)
-    lhs_noconst = lhs_diff.integrate(x)
-    left_constant = lhs - lhs_noconst
+    left_constant = lhs.coeff(x,0)
 
 
     # Use conditional blocks to construct content that only sometimes shows up.
@@ -356,7 +354,6 @@ def logarithm_solver(sub):
         value = latex(rhs)))
 
     return explanation
-
 
 
 
