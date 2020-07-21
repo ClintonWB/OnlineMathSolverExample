@@ -354,10 +354,7 @@ def logarithm_solver(sub):
         value = latex(rhs)))
 
     return explanation
-<<<<<<< HEAD
-=======
 
->>>>>>> log_function
 
 
 # Square Roots
