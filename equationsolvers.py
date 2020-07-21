@@ -159,6 +159,7 @@ def linear_solver(sub):
     left_constant = lhs - coeff*x
 
     # Use conditional blocks to construct content that only sometimes shows up.
+
     if not left_constant.is_zero:
         new_rhs = rhs - left_constant
         new_lhs = lhs - left_constant
@@ -176,6 +177,23 @@ def linear_solver(sub):
                    ))
         lhs = new_lhs
         rhs = new_rhs
+
+    new_lhs = sympy.E**lhs
+    new_rhs = sympy.E**rhs
+    explanation += dedent("""\
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \\begin{{align*}}
+        e^{old_lhs} &=e^{old_rhs} \\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               new_lhs = latex(new_lhs),
+               new_rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
 
     if not coeff == 1:
         new_rhs = rhs/coeff
@@ -265,7 +283,7 @@ def logarithm_solver(sub):
     lhs_diff = lhs.diff(x)
     lhs_noconst = lhs_diff.integrate(x)
     left_constant = lhs - lhs_noconst
-    
+
 
     # Use conditional blocks to construct content that only sometimes shows up.
     if not left_constant.is_zero:
