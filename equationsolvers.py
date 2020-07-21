@@ -357,14 +357,280 @@ def logarithm_solver(sub):
 
 
 
-# Square Roots
-# Examples:
-#     "sqrt(x+1)=2"
-#     "2sqrt(2x-3)+3=5"
-#     "1-2sqrt(2-x)=3"
-# As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
-    return False
+    r"""Square Root Checker/Solver.
+
+    Checks whether a given string is a square root in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as square root,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> square_root_solver("")
+    False
+
+    >>> square_root_solver("something abstract")
+    False
+
+    >>> square_root_solver("x+1")
+    False
+
+    >>> square_root_solver("x**2+1=1")
+    False
+
+    >>> print(square_root_solver("sqrt(x+1) = 2"))
+    Let's solve the equation:
+    \[
+        \sqrt{x + 1} = 2
+    \]
+    The square root, $\sqrt{x + 1}$, is isolated on the left.
+    Square both sides.
+    \begin{align*}
+        \sqrt{x + 1}^2 &= 2^2\\
+        x + 1 &= 4
+    \end{align*}
+    We subtract 1 from both sides:
+    \begin{align*}
+        (x + 1)-(1) &= 4-(1) \\
+        x &= 3
+    \end{align*}
+    The equation is in the form $x = 3$;
+    That is, the value of $x$ is $3$.
+
+    >>> print(square_root_solver("2sqrt(2x-3)+3=5"))
+    Let's solve the equation:
+    \[
+        2 \sqrt{2 x - 3} + 3 = 5
+    \]
+    First, we subtract 3 from both sides:
+    \begin{align*}
+        (2 \sqrt{2 x - 3} + 3)-(3) &= 5-(3) \\
+        2 \sqrt{2 x - 3} &= 2
+    \end{align*}
+    We have just one term on the left:
+    The square root $2 \sqrt{2 x - 3}$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 \sqrt{2 x - 3} }{ 2 } &=
+        \frac{ 2 }{ 2 } \\
+        \sqrt{2 x - 3} &= 1
+    \end{align*}
+    The square root, $\sqrt{2 x - 3}$, is isolated on the left.
+    Square both sides.
+    \begin{align*}
+        \sqrt{2 x - 3}^2 &= 1^2\\
+        2 x - 3 &= 1
+    \end{align*}
+    We subtract -3 from both sides:
+    \begin{align*}
+        (2 x - 3)-(-3) &= 1-(-3) \\
+        2 x &= 4
+    \end{align*}
+    We have just one term on the left:
+    The variable $x$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 x }{ 2 } &=
+        \frac{ 4 }{ 2 } \\
+        x &= 2
+    \end{align*}
+    The equation is in the form $x = 2$;
+    That is, the value of $x$ is $2$.
+
+    >>> print(square_root_solver("1-2sqrt(2-x)=3"))
+    Let's solve the equation:
+    \[
+        1 - 2 \sqrt{2 - x} = 3
+    \]
+    First, we subtract 1 from both sides:
+    \begin{align*}
+        (1 - 2 \sqrt{2 - x})-(1) &= 3-(1) \\
+        - 2 \sqrt{2 - x} &= 2
+    \end{align*}
+    We have just one term on the left:
+    The square root $- 2 \sqrt{2 - x}$ with coefficient $-2$.
+    Divide both sides by $-2$:
+    \begin{align*}
+        \frac{ - 2 \sqrt{2 - x} }{ -2 } &=
+        \frac{ 2 }{ -2 } \\
+        \sqrt{2 - x} &= -1
+    \end{align*}
+    The right hand side is -1, a negative number. Thus, there is no solution.
+
+
+
+    """
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a square root equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if not (expr.lhs.diff(x)**(-2)).diff(x).is_constant():
+        return False
+
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    just_the_root = (2*expr.lhs.diff(x)).as_numer_denom()[1]
+    coeff = lhs.coeff(just_the_root)
+    left_constant = lhs - coeff*just_the_root
+
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The square root ${old_lhs}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if rhs<0:
+        explanation += dedent("""The right hand side is {old_rhs}, a negative number. Thus, there is no solution.""".format(old_rhs = latex(rhs)))
+        return explanation
+
+    new_rhs = rhs**2
+    new_lhs = lhs**2
+
+    explanation += dedent("""\
+    The square root, ${old_lhs}$, is isolated on the left.
+    Square both sides.
+    \\begin{{align*}}
+        {old_lhs}^2 &= {old_rhs}^2\\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(coefficient = latex(coeff),
+               variable = latex(x),
+               old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               new_lhs = latex(new_lhs),
+               new_rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
+
+    ##We now have a linear expression
+    coeff = lhs.coeff(x)
+    left_constant = lhs - coeff*x
+
+
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        We subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
+
+
+    return explanation
 
 
 # Quadratic Equation Solver
