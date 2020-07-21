@@ -218,15 +218,40 @@ def exponential_solver(sub):
 
 
 # Logarithm
-# Examples:
-#     "ln(x)=3"
-#     "ln(2x)-1=4"
-#     "ln(3x)+3=2"
-#     "ln(3a+1)-1=3"
+#Examples:
+     #"ln(x)=3"
+    # "ln(2x)-1=4"
+    # "ln(3x)+3=2"
+    # "ln(3a+1)-1=3"
 # As a challenge,
 # You can also choose to support other formats of log
 def logarithm_solver(sub):
-    return False
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a logarithmic equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    expr_diff = expr.lhs.diff(x)
+    expr_recip = 1/expr_diff
+    d_expr_recip = expr_recip.diff(x)
+    if not d_expr_recip.diff(x).is_constant():
+        return False
 
 
 # Square Roots
