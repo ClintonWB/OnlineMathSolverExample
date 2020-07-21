@@ -159,6 +159,7 @@ def linear_solver(sub):
     left_constant = lhs - coeff*x
 
     # Use conditional blocks to construct content that only sometimes shows up.
+
     if not left_constant.is_zero:
         new_rhs = rhs - left_constant
         new_lhs = lhs - left_constant
@@ -353,6 +354,10 @@ def logarithm_solver(sub):
         value = latex(rhs)))
 
     return explanation
+<<<<<<< HEAD
+=======
+
+>>>>>>> log_function
 
 
 # Square Roots
