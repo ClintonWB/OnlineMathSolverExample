@@ -300,11 +300,96 @@ def square_root_solver(sub):
     if not (expr.lhs.diff(x)**(-2)).diff(x).is_constant():
         return False
 
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    just_the_root = (2*expr.lhs.diff(x)).as_numer_denom()[1]
+    coeff = lhs.coeff(just_the_root)
+    left_constant = lhs - coeff*just_the_root
+
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The square root ${old_lhs}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if rhs<0:
+        explanation += dedent("""The right hand side is {old_rhs}, a negative number. Thus, there is no solution.""".format(old_rhs = latex(rhs)))
+        return explanation
+
+    new_rhs = rhs**2
+    new_lhs = lhs**s
+
+    explanation += dedent("""\
+    We have isolated the square root, ${old_lhs}$ on the left.
+    Square both sides.
+    \\begin{{align*}}
+        \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+        \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(coefficient = latex(coeff),
+               variable = latex(x),
+               old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               new_lhs = latex(new_lhs),
+               new_rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
+
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
 
 
-    return False
 
-
+    return explanation
 
 
 
