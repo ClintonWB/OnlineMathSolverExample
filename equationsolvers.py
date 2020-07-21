@@ -218,15 +218,141 @@ def exponential_solver(sub):
 
 
 # Logarithm
-# Examples:
-#     "ln(x)=3"
-#     "ln(2x)-1=4"
-#     "ln(3x)+3=2"
-#     "ln(3a+1)-1=3"
+#Examples:
+     #"ln(x)=3"
+    # "ln(2x)-1=4"
+    # "ln(3x)+3=2"
+    # "ln(3a+1)-1=3"
 # As a challenge,
 # You can also choose to support other formats of log
 def logarithm_solver(sub):
-    return False
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a logarithmic equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    expr_diff = expr.lhs.diff(x)
+    expr_recip = 1/expr_diff
+    d_expr_recip = expr_recip.diff(x)
+    if not d_expr_recip.is_constant():
+        return False
+    if d_expr_recip.is_zero:
+        return False
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    left_constant = lhs.coeff(x,0)
+
+
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    new_lhs = sympy.E**lhs
+    new_rhs = sympy.E**rhs
+    explanation += dedent("""\
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \\begin{{align*}}
+        e^{old_lhs} &=e^{old_rhs} \\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               new_lhs = latex(new_lhs),
+               new_rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
+
+    coeff = lhs.coeff(x)
+    left_constant = lhs - coeff*x
+
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        We now solve the resutling linear equation. We subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
+
+    return explanation
 
 
 # Square Roots
