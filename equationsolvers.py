@@ -287,6 +287,23 @@ def logarithm_solver(sub):
         lhs = new_lhs
         rhs = new_rhs
 
+    new_lhs = sympy.E**lhs
+    new_rhs = sympy.E**rhs
+    explanation += dedent("""\
+    We have isolated the natural log on the left, so we now exponentiate
+    both sides:
+    \\begin{{align*}}
+        e^{old_lhs} &=e^{old_rhs} \\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               new_lhs = latex(new_lhs),
+               new_rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
+
     if not coeff == 1:
         new_rhs = rhs/coeff
         new_lhs = lhs/coeff
