@@ -251,7 +251,9 @@ def logarithm_solver(sub):
     expr_diff = expr.lhs.diff(x)
     expr_recip = 1/expr_diff
     d_expr_recip = expr_recip.diff(x)
-    if not d_expr_recip.diff(x).is_constant():
+    if not d_expr_recip.is_constant():
+        return False
+    if d_expr_recip.is_zero:
         return False
     # Now that we know the structure of the equation,
     # we can turn it into a worked-through solution.
