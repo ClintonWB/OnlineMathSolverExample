@@ -397,5 +397,3 @@ equation_solvers = (linear_solver,
 if __name__ == "__main__":
     import doctest
     doctest.testmod( )
-
-logarithm_solver("ln(x)=3")
