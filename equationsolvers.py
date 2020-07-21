@@ -361,14 +361,13 @@ def square_root_solver(sub):
         return explanation
 
     new_rhs = rhs**2
-    new_lhs = lhs**s
+    new_lhs = lhs**2
 
     explanation += dedent("""\
     We have isolated the square root, ${old_lhs}$ on the left.
     Square both sides.
     \\begin{{align*}}
-        \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
-        \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+        {old_lhs}^2 &= {old_rhs}^2\\\\
         {new_lhs} &= {new_rhs}
     \\end{{align*}}
     """.format(coefficient = latex(coeff),
@@ -381,6 +380,51 @@ def square_root_solver(sub):
     lhs = new_lhs
     rhs = new_rhs
 
+    ##We now have a linear expression
+    coeff = lhs.coeff(x)
+    left_constant = lhs - coeff*x
+
+
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        Again, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
     explanation += dedent("""\
         The equation is in the form ${variable} = {value}$;
         That is, the value of ${variable}$ is ${value}$.""".format(
@@ -391,6 +435,7 @@ def square_root_solver(sub):
 
     return explanation
 
+print(square_root_solver("2sqrt(2x-3)+3=5"))
 
 
 # Quadratic Equation Solver
