@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, request, render_template
 from equationsolvers import equation_solvers as solvers
-from markdown import markdown
 
 app = Flask("Solver Website")
 
