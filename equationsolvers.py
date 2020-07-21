@@ -237,8 +237,128 @@ def logarithm_solver(sub):
 #     "1-2sqrt(2-x)=3"
 # As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
-    return False
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
 
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a linear equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    try:
+        sqrinsm = 1/(expr.lhs.diff(x)**2)
+    except:
+        return False
+    if not sqrinsm.diff(x).is_constant():
+        return False
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    #coeff = lhs.coeff(x)
+    left_constant = sympy.simplify(lhs - sympy.integrate(lhs.diff(x),x))
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    new_rhs = rhs**2
+    new_lhs = lhs**2
+    explanation += dedent("""\
+        Now, we square both sides to get rid of the square root.
+        \\begin{{align*}}
+            ({old_lhs})^2 &= ({old_rhs})^2 \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+
+    rhs = new_rhs
+    lhs = new_lhs
+    coeff = lhs.coeff(x)
+    left_constant = sympy.simplify(lhs - sympy.integrate(lhs.diff(x),x))
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        Next, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
+
+    return explanation
 
 # Quadratic Equation Solver
 # Examples:
