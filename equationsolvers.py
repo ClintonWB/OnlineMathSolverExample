@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import sympy
+from sympy import Eq, latex, E, symbols, simplify, ln
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
-    implicit_multiplication, standard_transformations)
+    implicit_multiplication, standard_transformations, convert_xor)
+
 from textwrap import dedent
 
 # Linear Equation Solver
@@ -215,7 +216,235 @@ def linear_solver(sub):
 #     "1+2e^(x-1)=5"
 #     "1-2e^(x-1)=5"
 def exponential_solver(sub):
-    return False
+    r"""Exponential Equation Checker/Solver.
+
+    Checks whether a given string is an exponential equation in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as exponential,
+        A worked thorugh $\LaTeX$ explanation otherwise, either
+        producing a solution or an explanation why a solution does
+        not exist
+
+    Examples
+    --------
+
+    >>> exponential_solver("")
+    False
+
+    >>> exponential_solver("something abstract")
+    False
+
+    >>> exponential_solver("e^x+3")
+    False
+
+    >>> exponential_solver("x**2+1=1")
+    False
+
+    >>> print(exponential_solver("e^x-5=2"))
+    Let's solve the equation:
+    \[
+        e^{x} - 5 = 2
+    \]
+    First, we subtract -5 from both sides:
+    \begin{align*}
+        (e^{x} - 5)-(-5) &= 2-(-5) \\
+        e^{x} &= 7
+    \end{align*}
+    The equation is in the form $e^{x} = 7$;
+    We take the natural log of both sides:
+    \begin{align*}
+        \ln(e^{x}) &= \ln(7) \\
+        x &= \log{\left(7 \right)}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        x = \log{\left(7 \right)}
+    \]
+    The equation is in the form $x = \log{\left(7 \right)}$;
+    That is, the value of $x$ is $\log{\left(7 \right)}$.
+
+    >>> print(exponential_solver("1+2e^(x-1)=5"))
+    Let's solve the equation:
+    \[
+        2 e^{x - 1} + 1 = 5
+    \]
+    First, we subtract 1 from both sides:
+    \begin{align*}
+        (2 e^{x - 1} + 1)-(1) &= 5-(1) \\
+        2 e^{x - 1} &= 4
+    \end{align*}
+    We have just one term on the left:
+    The expression $e^{x - 1}$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 e^{x - 1} }{ 2 } &=
+        \frac{ 4 }{ 2 } \\
+        e^{x - 1} &= 2
+    \end{align*}
+    The equation is in the form $e^{x - 1} = 2$;
+    We take the natural log of both sides:
+    \begin{align*}
+        \ln(e^{x - 1}) &= \ln(2) \\
+        x - 1 &= \log{\left(2 \right)}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        x - 1 = \log{\left(2 \right)}
+    \]
+    First, we subtract -1 from both sides:
+    \begin{align*}
+        (x - 1)-(-1) &= \log{\left(2 \right)}-(-1) \\
+        x &= \log{\left(2 \right)} + 1
+    \end{align*}
+    The equation is in the form $x = \log{\left(2 \right)} + 1$;
+    That is, the value of $x$ is $\log{\left(2 \right)} + 1$.
+
+    >>> print(exponential_solver("1-2e^(x-1)=5"))
+    Let's solve the equation:
+    \[
+        1 - 2 e^{x - 1} = 5
+    \]
+    First, we subtract 1 from both sides:
+    \begin{align*}
+        (1 - 2 e^{x - 1})-(1) &= 5-(1) \\
+        - 2 e^{x - 1} &= 4
+    \end{align*}
+    We have just one term on the left:
+    The expression $e^{x - 1}$ with coefficient $-2$.
+    Divide both sides by $-2$:
+    \begin{align*}
+        \frac{ - 2 e^{x - 1} }{ -2 } &=
+        \frac{ 4 }{ -2 } \\
+        e^{x - 1} &= -2
+    \end{align*}
+    The equation is in the form $e^{x - 1} = -2$;
+    The right hand side is not positive, and so is
+    not in the range of $e^{x - 1}$. Therefore, this
+    equation has no solution.
+    """
+    # Check if SymPy can parse the expression as an equation
+    try:
+        original_expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs, convert_xor))
+    except (SyntaxError, ValueError):
+        return False
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    expr = original_expr.subs({'e':E})
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    y, = variables
+
+    # Check if it is an exponential equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if simplify(expr.lhs.diff(y)) == 0 or simplify(expr.lhs.diff(y,y)) == 0:
+        return False
+    elif not simplify(expr.lhs.diff(y,y)/expr.lhs.diff(y)).is_constant():
+        return False
+
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    left_constant = lhs - lhs.diff(y).integrate(y)
+    coeff = simplify((original_expr.lhs-left_constant).subs('e',1))
+
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The expression ${new_lhs}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    #Notify the user that there is no solution, if that is the case
+    if not rhs.is_positive:
+        explanation += dedent("""\
+        The equation is in the form ${old_lhs} = {old_rhs}$;
+        The right hand side is not positive, and so is
+        not in the range of ${old_lhs}$. Therefore, this
+        equation has no solution.""".format(old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   ))
+        return explanation
+
+    #x must be real for the simplification to go through
+    x = symbols('x', real=True)
+    lhs = lhs.subs({y:x})
+    new_lhs = simplify(ln(lhs))
+    new_rhs = simplify(ln(rhs))
+    explanation += dedent("""\
+    The equation is in the form ${old_lhs} = {old_rhs}$;
+    We take the natural log of both sides:
+    \\begin{{align*}}
+        \ln({old_lhs}) &= \ln({old_rhs}) \\\\
+        {lhs} &= {rhs}
+    \\end{{align*}}
+    """.format(old_lhs = latex(lhs),
+               old_rhs = latex(rhs),
+               lhs = latex(new_lhs),
+               rhs = latex(new_rhs),
+               ))
+    lhs = new_lhs
+    rhs = new_rhs
+
+    #now, use what we already have
+    explanation += linear_solver(str(lhs)+"="+str(rhs))
+    return explanation
 
 
 # Logarithm
