@@ -314,8 +314,6 @@ def logarithm_solver(sub):
         return False
     if not expr.rhs.is_constant():
         return False
-    if expr.lhs.diff(x).coeff(x,-1).is_zero:
-        return False
 
     explanation = dedent("""\
     Let's solve the equation:
