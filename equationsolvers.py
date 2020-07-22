@@ -256,6 +256,287 @@ def quadratic_solver(sub):
 # You can do it in only two dimensions if you want,
 # or challenge yourself to do it for more.
 def system_of_linear_equations_solver(sub):
+    r"""System of Linear Equationa Checker/Solver.
+
+    Checks whether a given string is a system of linear equations in two variables,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as linear system,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> system_of_linear_equations_solver("")
+    False
+
+    >>> system_of_linear_equations_solver("something abstract")
+    False
+
+    >>> system_of_linear_equations_solver("x+1")
+    False
+
+    >>> print(system_of_linear_equations_solver("x=1"))
+    False
+
+    >>> print(system_of_linear_equations_solver("a=1,b=0"))
+    False
+
+    >>> print(system_of_linear_equations_solver("a=b+1,0=a-b"))
+    False
+
+    >>> print(system_of_linear_equations_solver("x+y=0,2x-y=9,2x+y=3"))
+    False
+
+    >>> system_of_linear_equations_solver("x**2+y=1,xy=1")
+    False
+
+    >>> print(system_of_linear_equations_solver("a+2b = 1,a-b=3"))
+    Let's solve the system of equations:
+    \[
+        \begin{align*}
+            a + 2 b&=1\\
+            a - b&=3
+        \end{align*}
+    \]
+    First we multiply each equation by the coefficient of $b$ in the other equations.
+    This way they will all have the same coefficient for $b$.
+    \begin{align*}
+        -1\left(a + 2 b\right)&=-1\left(1\right)\\
+        - a - 2 b&=-1
+    \end{align*}
+    \begin{align*}
+        2\left(a - b\right)&=2\left(3\right)\\
+        2 a - 2 b&=6
+    \end{align*}
+    If we subtract the second equation from the first, we get:
+    \begin{align*}
+        - 3 a&=-7
+    \end{align*}
+    Since this is now an equation in one variable, we can solve it like we would
+    any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        - 3 a = -7
+    \]
+    We have just one term on the left:
+    The variable $a$ with coefficient $-3$.
+    Divide both sides by $-3$:
+    \begin{align*}
+        \frac{ - 3 a }{ -3 } &=
+        \frac{ -7 }{ -3 } \\
+        a &= \frac{7}{3}
+    \end{align*}
+    The equation is in the form $a = \frac{7}{3}$;
+    That is, the value of $a$ is $\frac{7}{3}$.\begin{align*}
+    \end{align*}
+    Plugging in $\frac{7}{3}$ for $a$ in the first equation, we can now
+    solve for $b$ like we would any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        2 b + \frac{7}{3} = 1
+    \]
+    First, we subtract 7/3 from both sides:
+    \begin{align*}
+        (2 b + \frac{7}{3})-(7/3) &= 1-(7/3) \\
+        2 b &= - \frac{4}{3}
+    \end{align*}
+    We have just one term on the left:
+    The variable $b$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 b }{ 2 } &=
+        \frac{ - \frac{4}{3} }{ 2 } \\
+        b &= - \frac{2}{3}
+    \end{align*}
+    The equation is in the form $b = - \frac{2}{3}$;
+    That is, the value of $b$ is $- \frac{2}{3}$.\begin{align*}
+    \end{align*}
+    Thus we have found the pair of values which satisfy the two linear equations:
+    $b=- \frac{2}{3}$ and $a=\frac{7}{3}$.
+    <BLANKLINE>
+
+    >>> print(system_of_linear_equations_solver("3x+2/3y=5/2,5x-y=2"))
+    Let's solve the system of equations:
+    \[
+        \begin{align*}
+            3 x + \frac{2 y}{3}&=\frac{5}{2}\\
+            5 x - y&=2
+        \end{align*}
+    \]
+    First we multiply each equation by the coefficient of $x$ in the other equations.
+    This way they will all have the same coefficient for $x$.
+    \begin{align*}
+        5\left(3 x + \frac{2 y}{3}\right)&=5\left(\frac{5}{2}\right)\\
+        15 x + \frac{10 y}{3}&=\frac{25}{2}
+    \end{align*}
+    \begin{align*}
+        3\left(5 x - y\right)&=3\left(2\right)\\
+        15 x - 3 y&=6
+    \end{align*}
+    If we subtract the second equation from the first, we get:
+    \begin{align*}
+        \frac{19 y}{3}&=\frac{13}{2}
+    \end{align*}
+    Since this is now an equation in one variable, we can solve it like we would
+    any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        \frac{19 y}{3} = \frac{13}{2}
+    \]
+    We have just one term on the left:
+    The variable $y$ with coefficient $\frac{19}{3}$.
+    Divide both sides by $\frac{19}{3}$:
+    \begin{align*}
+        \frac{ \frac{19 y}{3} }{ \frac{19}{3} } &=
+        \frac{ \frac{13}{2} }{ \frac{19}{3} } \\
+        y &= \frac{39}{38}
+    \end{align*}
+    The equation is in the form $y = \frac{39}{38}$;
+    That is, the value of $y$ is $\frac{39}{38}$.\begin{align*}
+    \end{align*}
+    Plugging in $\frac{39}{38}$ for $y$ in the first equation, we can now
+    solve for $x$ like we would any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        3 x + \frac{13}{19} = \frac{5}{2}
+    \]
+    First, we subtract 13/19 from both sides:
+    \begin{align*}
+        (3 x + \frac{13}{19})-(13/19) &= \frac{5}{2}-(13/19) \\
+        3 x &= \frac{69}{38}
+    \end{align*}
+    We have just one term on the left:
+    The variable $x$ with coefficient $3$.
+    Divide both sides by $3$:
+    \begin{align*}
+        \frac{ 3 x }{ 3 } &=
+        \frac{ \frac{69}{38} }{ 3 } \\
+        x &= \frac{23}{38}
+    \end{align*}
+    The equation is in the form $x = \frac{23}{38}$;
+    That is, the value of $x$ is $\frac{23}{38}$.\begin{align*}
+    \end{align*}
+    Thus we have found the pair of values which satisfy the two linear equations:
+    $x=\frac{23}{38}$ and $y=\frac{39}{38}$.
+    <BLANKLINE>
+
+    >>> print(system_of_linear_equations_solver("3a+2b=5,a+2b=3"))
+    Let's solve the system of equations:
+    \[
+        \begin{align*}
+            3 a + 2 b&=5\\
+            a + 2 b&=3
+        \end{align*}
+    \]
+    If we subtract the second equation from the first, we get:
+    \begin{align*}
+        4 a&=4
+    \end{align*}
+    Since this is now an equation in one variable, we can solve it like we would
+    any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        4 a = 4
+    \]
+    We have just one term on the left:
+    The variable $a$ with coefficient $4$.
+    Divide both sides by $4$:
+    \begin{align*}
+        \frac{ 4 a }{ 4 } &=
+        \frac{ 4 }{ 4 } \\
+        a &= 1
+    \end{align*}
+    The equation is in the form $a = 1$;
+    That is, the value of $a$ is $1$.\begin{align*}
+    \end{align*}
+    Plugging in $1$ for $a$ in the first equation, we can now
+    solve for $b$ like we would any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        2 b + 3 = 5
+    \]
+    First, we subtract 3 from both sides:
+    \begin{align*}
+        (2 b + 3)-(3) &= 5-(3) \\
+        2 b &= 2
+    \end{align*}
+    We have just one term on the left:
+    The variable $b$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 b }{ 2 } &=
+        \frac{ 2 }{ 2 } \\
+        b &= 1
+    \end{align*}
+    The equation is in the form $b = 1$;
+    That is, the value of $b$ is $1$.\begin{align*}
+    \end{align*}
+    Thus we have found the pair of values which satisfy the two linear equations:
+    $b=1$ and $a=1$.
+    <BLANKLINE>
+
+    >>> print(system_of_linear_equations_solver("x+y=5,x+y=3"))
+    Let's solve the system of equations:
+    \[
+        \begin{align*}
+            x + y&=5\\
+            x + y&=3
+        \end{align*}
+    \]
+    If we subtract the second equation from the first, we get:
+    \begin{align*}
+        0&=2
+    \end{align*}
+    But these values aren't equal, so there are no solutions to this system of equations.
+    <BLANKLINE>
+
+    >>> print(system_of_linear_equations_solver("x+y=5,2x+2y=10"))
+    Let's solve the system of equations:
+    \[
+        \begin{align*}
+            x + y&=5\\
+            2 x + 2 y&=10
+        \end{align*}
+    \]
+    First we multiply each equation by the coefficient of $x$ in the other equations.
+    This way they will all have the same coefficient for $x$.
+    \begin{align*}
+        2\left(x + y\right)&=2\left(5\right)\\
+        2 x + 2 y&=10
+    \end{align*}
+    If we subtract the second equation from the first, we get:
+    \begin{align*}
+        0&=0
+    \end{align*}
+    In this case, both variables ended up cancelling out since the two
+    equations were scalar multiples of each other. Thus there are an
+    infinite number of solutions to this system of equations.
+    <BLANKLINE>
+    """
+
     #separate the equations at the comma
     eqns=sub.split(",")
     if len(eqns) != 2:
