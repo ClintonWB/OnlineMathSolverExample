@@ -579,19 +579,19 @@ def system_of_linear_equations_solver(sub):
             5 x - y&=2
         \end{align*}
     \]
-    First we multiply each equation by the coefficient of $x$ in the other equations.
-    This way they will all have the same coefficient for $x$.
+    First we multiply each equation by the coefficient of $y$ in the other equations.
+    This way they will all have the same coefficient for $y$.
     \begin{align*}
-        5\left(3 x + \frac{2 y}{3}\right)&=5\left(\frac{5}{2}\right)\\
-        15 x + \frac{10 y}{3}&=\frac{25}{2}
+        -1\left(3 x + \frac{2 y}{3}\right)&=-1\left(\frac{5}{2}\right)\\
+        - 3 x - \frac{2 y}{3}&=- \frac{5}{2}
     \end{align*}
     \begin{align*}
-        3\left(5 x - y\right)&=3\left(2\right)\\
-        15 x - 3 y&=6
+        \frac{2}{3}\left(5 x - y\right)&=\frac{2}{3}\left(2\right)\\
+        \frac{10 x}{3} - \frac{2 y}{3}&=\frac{4}{3}
     \end{align*}
     If we subtract the second equation from the first, we get:
     \begin{align*}
-        \frac{19 y}{3}&=\frac{13}{2}
+        - \frac{19 x}{3}&=- \frac{23}{6}
     \end{align*}
     Since this is now an equation in one variable, we can solve it like we would
     any other linear equation.
@@ -599,45 +599,45 @@ def system_of_linear_equations_solver(sub):
     \end{align*}
     Let's solve the equation:
     \[
-        \frac{19 y}{3} = \frac{13}{2}
+        - \frac{19 x}{3} = - \frac{23}{6}
     \]
     We have just one term on the left:
-    The variable $y$ with coefficient $\frac{19}{3}$.
-    Divide both sides by $\frac{19}{3}$:
+    The variable $x$ with coefficient $- \frac{19}{3}$.
+    Divide both sides by $- \frac{19}{3}$:
     \begin{align*}
-        \frac{ \frac{19 y}{3} }{ \frac{19}{3} } &=
-        \frac{ \frac{13}{2} }{ \frac{19}{3} } \\
-        y &= \frac{39}{38}
-    \end{align*}
-    The equation is in the form $y = \frac{39}{38}$;
-    That is, the value of $y$ is $\frac{39}{38}$.\begin{align*}
-    \end{align*}
-    Plugging in $\frac{39}{38}$ for $y$ in the first equation, we can now
-    solve for $x$ like we would any other linear equation.
-    \begin{align*}
-    \end{align*}
-    Let's solve the equation:
-    \[
-        3 x + \frac{13}{19} = \frac{5}{2}
-    \]
-    First, we subtract 13/19 from both sides:
-    \begin{align*}
-        (3 x + \frac{13}{19})-(13/19) &= \frac{5}{2}-(13/19) \\
-        3 x &= \frac{69}{38}
-    \end{align*}
-    We have just one term on the left:
-    The variable $x$ with coefficient $3$.
-    Divide both sides by $3$:
-    \begin{align*}
-        \frac{ 3 x }{ 3 } &=
-        \frac{ \frac{69}{38} }{ 3 } \\
+        \frac{ - \frac{19 x}{3} }{ - \frac{19}{3} } &=
+        \frac{ - \frac{23}{6} }{ - \frac{19}{3} } \\
         x &= \frac{23}{38}
     \end{align*}
     The equation is in the form $x = \frac{23}{38}$;
     That is, the value of $x$ is $\frac{23}{38}$.\begin{align*}
     \end{align*}
+    Plugging in $\frac{23}{38}$ for $x$ in the first equation, we can now
+    solve for $y$ like we would any other linear equation.
+    \begin{align*}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        \frac{2 y}{3} + \frac{69}{38} = \frac{5}{2}
+    \]
+    First, we subtract 69/38 from both sides:
+    \begin{align*}
+        (\frac{2 y}{3} + \frac{69}{38})-(69/38) &= \frac{5}{2}-(69/38) \\
+        \frac{2 y}{3} &= \frac{13}{19}
+    \end{align*}
+    We have just one term on the left:
+    The variable $y$ with coefficient $\frac{2}{3}$.
+    Divide both sides by $\frac{2}{3}$:
+    \begin{align*}
+        \frac{ \frac{2 y}{3} }{ \frac{2}{3} } &=
+        \frac{ \frac{13}{19} }{ \frac{2}{3} } \\
+        y &= \frac{39}{38}
+    \end{align*}
+    The equation is in the form $y = \frac{39}{38}$;
+    That is, the value of $y$ is $\frac{39}{38}$.\begin{align*}
+    \end{align*}
     Thus we have found the pair of values which satisfy the two linear equations:
-    $x=\frac{23}{38}$ and $y=\frac{39}{38}$.
+    $y=\frac{39}{38}$ and $x=\frac{23}{38}$.
     <BLANKLINE>
 
     >>> print(system_of_linear_equations_solver("3a+2b=5,a+2b=3"))
@@ -722,8 +722,8 @@ def system_of_linear_equations_solver(sub):
             2 x + 2 y&=10
         \end{align*}
     \]
-    First we multiply each equation by the coefficient of $x$ in the other equations.
-    This way they will all have the same coefficient for $x$.
+    First we multiply each equation by the coefficient of $y$ in the other equations.
+    This way they will all have the same coefficient for $y$.
     \begin{align*}
         2\left(x + y\right)&=2\left(5\right)\\
         2 x + 2 y&=10
