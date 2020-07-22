@@ -619,8 +619,8 @@ def logarithm_solver(sub):
         lhs = new_lhs
         rhs = new_rhs
 
-    new_lhs = sympy.E**lhs
-    new_rhs = sympy.E**rhs
+    new_lhs = E**lhs
+    new_rhs = E**rhs
     explanation += dedent("""\
     We have isolated the natural log on the left, so we now exponentiate
     both sides:
