@@ -314,11 +314,8 @@ def logarithm_solver(sub):
         return False
     if not expr.rhs.is_constant():
         return False
-    if not str(lhs).contains("ln") and not str(lhs).contains("log"):
-        if expr.lhs.diff(x).is_constant():
-            return False
-        if not expr.lhs.diff(x).diff(x).is_constant():
-            return False
+    if  not ("ln" in str(expr.lhs)) and not ("log" in str(expr.lhs)):
+        return False
 
     explanation = dedent("""\
     Let's solve the equation:
