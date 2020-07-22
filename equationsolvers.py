@@ -455,7 +455,8 @@ def quadratic_solver(sub):
 # You can do it in only two dimensions if you want,
 # or challenge yourself to do it for more.
 def system_of_linear_equations_solver(sub):
-    r"""System of Linear Equationa Checker/Solver.
+    #NOTE: tests may fail due to sets being randomly ordered, but the answers are correct
+    r"""System of Linear Equations Checker/Solver.
 
     Checks whether a given string is a system of linear equations in two variables,
     and if so, returns an explanation of how to solve it.
