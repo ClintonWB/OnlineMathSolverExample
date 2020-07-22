@@ -253,7 +253,7 @@ def square_root_solver(sub):
         return False
     x, = variables
 
-    # Check if it is a linear equation
+    # Check if it is of the form a+bsqrt(cx+d)=e
     if not isinstance(expr, Eq):
         return False
     if not expr.rhs.is_constant():
@@ -406,7 +406,7 @@ def quadratic_solver(sub):
         x^{2} &= 0
     \end{align*}
     We are done; the only possible solution is $x = 0$.
-    
+
     >>> print(quadratic_solver("x**2+2x+1=0"))
     Let's solve the equation:
     \[
@@ -425,7 +425,7 @@ def quadratic_solver(sub):
         \left(x + 1\right)^{2} &= 0
     \end{align*}
     Since the right-hand side is zero, there is only one way this can happen, specifically $x + 1 = 0$ or rather, $x = -1$.
-    
+
     >>> print(quadratic_solver("y**2+1=0"))
     Let's solve the equation:
     \[
@@ -439,7 +439,7 @@ def quadratic_solver(sub):
     \begin{align*}
         y &= \pm i
     \end{align*}
-    
+
     >>> print(quadratic_solver("z**2+3z+2=0"))
     Let's solve the equation:
     \[
@@ -478,7 +478,7 @@ def quadratic_solver(sub):
                                     convert_equals_signs))
     except (SyntaxError, ValueError):
         return False
-    
+
     # Verify the structure of the equation
 
     # Check if the expression is in 1 variable
@@ -486,7 +486,7 @@ def quadratic_solver(sub):
     if len(variables) != 1:
         return False
     x, = variables
-    
+
     # Check if it is a quadratic equation
     if not isinstance(expr, Eq):
         return False
@@ -496,7 +496,7 @@ def quadratic_solver(sub):
         return False
     if not expr.lhs.diff(x, 2).is_constant():
         return False
-    
+
     # Now that we know the structure of the equation,
     # we can turn it into a worked-through solution.
 
@@ -511,7 +511,7 @@ def quadratic_solver(sub):
     a = lhs.coeff(x, 2)
     b = lhs.coeff(x, 1)
     c = lhs.coeff(x, 0)
-    
+
     if c != 0:
         mode = "subtraction" if c>0 else "addition"
         rhs = rhs-c
@@ -525,7 +525,7 @@ def quadratic_solver(sub):
             latex(a*x**2+b*x),
             latex(rhs),
         ))
-    
+
     if a != 1:
         b /= a
         rhs /= a
@@ -539,14 +539,14 @@ def quadratic_solver(sub):
             latex(x**2+b*x),
             latex(rhs),
         ))
-    
+
     if rhs==0:
         explanation += dedent("""\
             We are done; the only possible solution is ${} = 0$.""".format(
             latex(x)
         ))
         return explanation
-    
+
     if b==0:
         explanation += dedent("""\
             Take the positive and negative square-roots to find
@@ -557,7 +557,7 @@ def quadratic_solver(sub):
             latex(sympy.sqrt(rhs))
         ))
         return explanation
-    
+
     rhs += (b/2)**2
     explanation += dedent("""\
         Complete the square by adding $\\left({}/2\\right)^2$ to both sides:
@@ -578,7 +578,7 @@ def quadratic_solver(sub):
         latex((x+b/2)**2),
         latex(rhs)
     ))
-    
+
     if rhs==0:
         explanation += dedent("""\
             Since the right-hand side is zero, there is only one way this can happen, specifically ${} = 0$ or rather, ${} = {}$.""".format(
@@ -587,8 +587,8 @@ def quadratic_solver(sub):
             latex(-b/2)
         ))
         return explanation
-    
-    
+
+
     explanation += dedent("""\
         and take the positive and negative square roots:
         \\begin{{align*}}
@@ -621,7 +621,7 @@ def quadratic_solver(sub):
         latex(x),
         simplified2
     ))
-    
+
     return explanation
 
 
