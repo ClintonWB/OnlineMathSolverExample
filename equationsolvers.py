@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from sympy import Eq, latex
+from sympy import exp
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
     implicit_multiplication, standard_transformations)
@@ -226,7 +227,140 @@ def exponential_solver(sub):
 # As a challenge,
 # You can also choose to support other formats of log
 def logarithm_solver(sub):
-    return False
+    r"""Logarithmic Equation Checker/Solver.
+
+    Checks whether a given string is a logarithmic equation in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as logarithmic,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> logarithm_solver("")
+    False
+
+    >>> logarithm_solver("something abstract")
+    False
+
+    >>> logarithm_solver("x+1")
+    False
+
+    >>> logarithm_solver("x**2+1=1")
+    False
+
+    >>> print(logarithm_solver("ln(2x)-1=4"))
+    Let's solve the equation:
+    \[
+        \log{\left(2 x \right)} - 1 = 4
+    \]
+    First, we subtract -1 from both sides:
+    \begin{align*}
+        (\log{\left(2 x \right)} - 1)-(-1) &= 4-(-1) \\
+        \log{\left(2 x \right)} &= 5
+    \end{align*}
+    Raise $e$ to both sides:
+    \begin{align*}
+        \ e^{old_lhs} &= e^{old_rhs} \\
+        2 x &= e^{5}
+    \end{align*}
+    Let's solve the equation:
+    \[
+        2 x = e^{5}
+    \]
+    We have just one term on the left:
+    The variable $x$ with coefficient $2$.
+    Divide both sides by $2$:
+    \begin{align*}
+        \frac{ 2 x }{ 2 } &=
+        \frac{ e^{5} }{ 2 } \\
+        x &= \frac{e^{5}}{2}
+    \end{align*}
+    The equation is in the form $x = \frac{e^{5}}{2}$;
+    That is, the value of $x$ is $\frac{e^{5}}{2}$.
+
+    """
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                      transformations=(*standard_transformations,
+                                        implicit_multiplication,
+                                        convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a logarithmic equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if expr.lhs.diff(x).coeff(x,-1).is_zero:
+        return False
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    left_constant = lhs.coeff(x,0)
+
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                     old_lhs = latex(lhs),
+                     old_rhs = latex(rhs),
+                     new_lhs = latex(new_lhs),
+                     new_rhs = latex(new_rhs),
+                     ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    new_rhs = exp(rhs)
+    new_lhs = exp(lhs)
+    explanation += dedent("""\
+    Raise $e$ to both sides:
+    \\begin{{align*}}
+        \\ e^{{old_lhs}} &= e^{{old_rhs}} \\\\
+        {new_lhs} &= {new_rhs}
+    \\end{{align*}}
+    """.format(old_lhs = latex(lhs),
+                  old_rhs = latex(rhs),
+                  new_lhs = latex(new_lhs),
+                  new_rhs = latex(new_rhs),
+                  ))
+    lhs = new_lhs
+    rhs = new_rhs
+
+    return explanation + linear_solver(str(lhs)+"="+str(rhs))
 
 
 # Square Roots
