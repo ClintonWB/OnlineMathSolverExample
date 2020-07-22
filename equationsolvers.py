@@ -246,6 +246,73 @@ def square_root_solver(sub):
 #    "y**2+1=0"
 #    "z**2+3z+2=0"
 def quadratic_solver(sub):
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a quadratic equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_zero:
+        return False
+    if expr.lhs.diff(x).is_constant():
+        return False
+    if not expr.lhs.diff(x).diff(x).is_constant():
+        return False
+
+
+    #convert the equation into varaibles.
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    coeff1 = lhs.coeff(x**2)
+    coeff2 = lhs.coeff(x)
+    constant = lhs -coeff2*x -coeff1*x**2
+
+    # Aplly the quadratic formula
+    explanation += "We apply the quadratic formula:"
+
+    explanation += dedent("""\
+    \\begin{{align*}}
+        \\frac{{-({coeff2}) \pm \sqrt{{{coeff2}^2-4\cdot{coeff1}\cdot{constant}}}}}{{2\cdot{coeff1}}}
+    \\end{{align*}}
+    """.format(coeff1 = latex(coeff1),
+                coeff2 = latex(coeff2),
+                constant = latex(constant)))
+
+    discriminant = coeff2**2-4*coeff1*constant
+    denominator = 2*coeff1
+    leader = -1*coeff2
+    explanation += dedent("""We simplify:""")
+
+    explanation += dedent("""\
+    \\begin{{align*}}
+        \\frac{{{leader} \pm \sqrt{{{discriminant}}}}}{{{denominator}}}
+    \\end{{align*}}
+    """.format(leader= latex(leader),
+                discriminant = latex(discriminant),
+                denominator = latex(denominator)
+                ))
+
+
+    return explanation
     return False
 
 
