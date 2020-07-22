@@ -298,7 +298,7 @@ def logarithm_solver(sub):
                       transformations=(*standard_transformations,
                                         implicit_multiplication,
                                         convert_equals_signs))
-    except (SyntaxError, ValueError):
+    except:
         return False
 
     # Verify the structure of the equation
@@ -385,7 +385,7 @@ def quadratic_solver(sub):
                    transformations=(*standard_transformations,
                                     implicit_multiplication,
                                     convert_equals_signs))
-    except (SyntaxError, ValueError):
+    except:
         return False
 
     # Verify the structure of the equation
