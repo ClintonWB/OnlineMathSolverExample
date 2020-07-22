@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from sympy import Eq, latex
+import sympy
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
     implicit_multiplication, standard_transformations)
@@ -236,8 +237,128 @@ def logarithm_solver(sub):
 #     "1-2sqrt(2-x)=3"
 # As a challenge, you can consider other roots like ^(1/3).
 def square_root_solver(sub):
-    return False
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
 
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is of the form a+bsqrt(cx+d)=e
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    try:
+        sqrinsm = 1/(expr.lhs.diff(x)**2)
+    except:
+        return False
+    if not sqrinsm.diff(x).is_constant():
+        return False
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    #coeff = lhs.coeff(x)
+    left_constant = sympy.simplify(lhs - sympy.integrate(lhs.diff(x),x))
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    new_rhs = rhs**2
+    new_lhs = lhs**2
+    explanation += dedent("""\
+        Now, we square both sides to get rid of the square root.
+        \\begin{{align*}}
+            ({old_lhs})^2 &= ({old_rhs})^2 \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+
+    rhs = new_rhs
+    lhs = new_lhs
+    coeff = lhs.coeff(x)
+    left_constant = sympy.simplify(lhs - sympy.integrate(lhs.diff(x),x))
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        Next, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
+
+    return explanation
 
 # Quadratic Equation Solver
 # Examples:
@@ -245,7 +366,263 @@ def square_root_solver(sub):
 #    "y**2+1=0"
 #    "z**2+3z+2=0"
 def quadratic_solver(sub):
-    return False
+    r"""Quadratic Equation Checker/Solver.
+
+    Checks whether a given string is a linear equation in one variable,
+    and if so, returns an explanation of how to solve it.
+
+    Parameters
+    ----------
+
+    sub : str
+        The submitted expression, as a math string, to be passed to SymPy.
+
+    Returns
+    -------
+
+    explanation:
+        False if unable to parse as linear,
+        A worked thorugh $\LaTeX$ explanation otherwise.
+
+    Examples
+    --------
+
+    >>> quadratic_solver("")
+    False
+
+    >>> quadratic_solver("something abstract")
+    False
+
+    >>> quadratic_solver("x+1")
+    False
+
+    >>> print(quadratic_solver("x**2+1=1"))
+    Let's solve the equation:
+    \[
+        x^{2} + 1 = 1
+    \]
+    Move the constant term to the right-hand side by subtraction:
+    \begin{align*}
+        x^{2} &= 0
+    \end{align*}
+    We are done; the only possible solution is $x = 0$.
+
+    >>> print(quadratic_solver("x**2+2x+1=0"))
+    Let's solve the equation:
+    \[
+        x^{2} + 2 x + 1 = 0
+    \]
+    Move the constant term to the right-hand side by subtraction:
+    \begin{align*}
+        x^{2} + 2 x &= -1
+    \end{align*}
+    Complete the square by adding $\left(2/2\right)^2$ to both sides:
+    \begin{align*}
+        x^{2} + 2 x + 1 &= 0
+    \end{align*}
+    and then factor:
+    \begin{align*}
+        \left(x + 1\right)^{2} &= 0
+    \end{align*}
+    Since the right-hand side is zero, there is only one way this can happen, specifically $x + 1 = 0$ or rather, $x = -1$.
+
+    >>> print(quadratic_solver("y**2+1=0"))
+    Let's solve the equation:
+    \[
+        y^{2} + 1 = 0
+    \]
+    Move the constant term to the right-hand side by subtraction:
+    \begin{align*}
+        y^{2} &= -1
+    \end{align*}
+    Take the positive and negative square-roots to find
+    \begin{align*}
+        y &= \pm i
+    \end{align*}
+
+    >>> print(quadratic_solver("z**2+3z+2=0"))
+    Let's solve the equation:
+    \[
+        z^{2} + 3 z + 2 = 0
+    \]
+    Move the constant term to the right-hand side by subtraction:
+    \begin{align*}
+        z^{2} + 3 z &= -2
+    \end{align*}
+    Complete the square by adding $\left(3/2\right)^2$ to both sides:
+    \begin{align*}
+        z^{2} + 3 z + \frac{9}{4} &= \frac{1}{4}
+    \end{align*}
+    and then factor:
+    \begin{align*}
+        \left(z + \frac{3}{2}\right)^{2} &= \frac{1}{4}
+    \end{align*}
+    and take the positive and negative square roots:
+    \begin{align*}
+        z + \frac{3}{2} &= \pm \frac{1}{2}
+    \end{align*}
+    and finally, move the term $\frac{3}{2}$ to the other side, flipping its sign:
+    \begin{align*}
+        z &= - \frac{3}{2}\pm \frac{1}{2}
+    \end{align*}
+    That is a good answer, but we would do well to simplify when we can:
+    \begin{align*}
+        z &= -1 &\text{or} z &= -2
+    \end{align*}
+    """
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,
+                                    implicit_multiplication,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+
+    # Verify the structure of the equation
+
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
+
+    # Check if it is a quadratic equation
+    if not isinstance(expr, Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if expr.lhs.diff(x).is_constant():
+        return False
+    if not expr.lhs.diff(x, 2).is_constant():
+        return False
+
+    # Now that we know the structure of the equation,
+    # we can turn it into a worked-through solution.
+
+    explanation = dedent("""\
+        Let's solve the equation:
+        \\[
+            {expression}
+        \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    a = lhs.coeff(x, 2)
+    b = lhs.coeff(x, 1)
+    c = lhs.coeff(x, 0)
+
+    if c != 0:
+        mode = "subtraction" if c>0 else "addition"
+        rhs = rhs-c
+        explanation += dedent("""\
+            Move the constant term to the right-hand side by {}:
+            \\begin{{align*}}
+                {} &= {}
+            \\end{{align*}}
+        """.format(
+            mode,
+            latex(a*x**2+b*x),
+            latex(rhs),
+        ))
+
+    if a != 1:
+        b /= a
+        rhs /= a
+        explanation += dedent("""\
+            Divide through by the coefficient of ${}^2$:
+            \\begin{{align*}}
+                {} &= {}
+            \\end{{align*}}
+        """.format(
+            x,
+            latex(x**2+b*x),
+            latex(rhs),
+        ))
+
+    if rhs==0:
+        explanation += dedent("""\
+            We are done; the only possible solution is ${} = 0$.""".format(
+            latex(x)
+        ))
+        return explanation
+
+    if b==0:
+        explanation += dedent("""\
+            Take the positive and negative square-roots to find
+            \\begin{{align*}}
+                {} &= \\pm {}
+            \\end{{align*}}""".format(
+            latex(x),
+            latex(sympy.sqrt(rhs))
+        ))
+        return explanation
+
+    rhs += (b/2)**2
+    explanation += dedent("""\
+        Complete the square by adding $\\left({}/2\\right)^2$ to both sides:
+        \\begin{{align*}}
+            {} &= {}
+        \\end{{align*}}
+    """.format(
+        latex(b),
+        latex(x**2+b*x+(b/2)**2),
+        latex(rhs)
+    ))
+    explanation += dedent("""\
+        and then factor:
+        \\begin{{align*}}
+            {} &= {}
+        \\end{{align*}}
+    """.format(
+        latex((x+b/2)**2),
+        latex(rhs)
+    ))
+
+    if rhs==0:
+        explanation += dedent("""\
+            Since the right-hand side is zero, there is only one way this can happen, specifically ${} = 0$ or rather, ${} = {}$.""".format(
+            latex(x+b/2),
+            latex(x),
+            latex(-b/2)
+        ))
+        return explanation
+
+
+    explanation += dedent("""\
+        and take the positive and negative square roots:
+        \\begin{{align*}}
+            {} &= \\pm {}
+        \\end{{align*}}
+    """.format(
+        latex(x+b/2),
+        latex(sympy.sqrt(rhs))
+    ))
+    explanation += dedent("""\
+        and finally, move the term ${}$ to the other side, flipping its sign:
+        \\begin{{align*}}
+            {} &= {}\\pm {}
+        \\end{{align*}}
+    """.format(
+        latex(b/2),
+        latex(x),
+        latex(-b/2),
+        latex(sympy.sqrt(rhs)),
+    ))
+    simplified1 = sympy.simplify(-b/2+sympy.sqrt(rhs))
+    simplified2 = sympy.simplify(-b/2-sympy.sqrt(rhs))
+    explanation += dedent("""\
+        That is a good answer, but we would do well to simplify when we can:
+        \\begin{{align*}}
+            {} &= {} &\\text{{or}} {} &= {}
+        \\end{{align*}}""".format(
+        latex(x),
+        simplified1,
+        latex(x),
+        simplified2
+    ))
+
+    return explanation
 
 
 # Systems of Linear Equations Solver
