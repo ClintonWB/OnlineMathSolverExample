@@ -5,6 +5,67 @@ from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
     implicit_multiplication, standard_transformations)
 from textwrap import dedent
 
+def linear_logic(expr,x):
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
+    coeff = lhs.coeff(x)
+    left_constant = lhs - coeff*x
+
+    # Use conditional blocks to construct content that only sometimes shows up.
+    if not left_constant.is_zero:
+        new_rhs = rhs - left_constant
+        new_lhs = lhs - left_constant
+        explanation += dedent("""\
+        First, we subtract {left_constant} from both sides:
+        \\begin{{align*}}
+            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(left_constant = left_constant,
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    if not coeff == 1:
+        new_rhs = rhs/coeff
+        new_lhs = lhs/coeff
+        explanation += dedent("""\
+        We have just one term on the left:
+        The variable ${variable}$ with coefficient ${coefficient}$.
+        Divide both sides by ${coefficient}$:
+        \\begin{{align*}}
+            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
+            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
+            {new_lhs} &= {new_rhs}
+        \\end{{align*}}
+        """.format(coefficient = latex(coeff),
+                   variable = latex(x),
+                   old_lhs = latex(lhs),
+                   old_rhs = latex(rhs),
+                   new_lhs = latex(new_lhs),
+                   new_rhs = latex(new_rhs),
+                   ))
+        lhs = new_lhs
+        rhs = new_rhs
+
+    explanation += dedent("""\
+        The equation is in the form ${variable} = {value}$;
+        That is, the value of ${variable}$ is ${value}$.""".format(
+        variable = latex(x),
+        value = latex(rhs)))
+
+    return explanation,rhs
+
 # Linear Equation Solver
 def linear_solver(sub):
     r"""Linear Equation Checker/Solver.
@@ -146,67 +207,7 @@ def linear_solver(sub):
 
     # Now that we know the structure of the equation,
     # we can turn it into a worked-through solution.
-
-    explanation = dedent("""\
-    Let's solve the equation:
-    \\[
-        {expression}
-    \\]
-    """.format(expression=latex(expr)))
-    lhs = expr.lhs
-    rhs = expr.rhs
-    coeff = lhs.coeff(x)
-    left_constant = lhs - coeff*x
-
-    # Use conditional blocks to construct content that only sometimes shows up.
-    if not left_constant.is_zero:
-        new_rhs = rhs - left_constant
-        new_lhs = lhs - left_constant
-        explanation += dedent("""\
-        First, we subtract {left_constant} from both sides:
-        \\begin{{align*}}
-            ({old_lhs})-({left_constant}) &= {old_rhs}-({left_constant}) \\\\
-            {new_lhs} &= {new_rhs}
-        \\end{{align*}}
-        """.format(left_constant = left_constant,
-                   old_lhs = latex(lhs),
-                   old_rhs = latex(rhs),
-                   new_lhs = latex(new_lhs),
-                   new_rhs = latex(new_rhs),
-                   ))
-        lhs = new_lhs
-        rhs = new_rhs
-
-    if not coeff == 1:
-        new_rhs = rhs/coeff
-        new_lhs = lhs/coeff
-        explanation += dedent("""\
-        We have just one term on the left:
-        The variable ${variable}$ with coefficient ${coefficient}$.
-        Divide both sides by ${coefficient}$:
-        \\begin{{align*}}
-            \\frac{{ {old_lhs} }}{{ {coefficient} }} &=
-            \\frac{{ {old_rhs} }}{{ {coefficient} }} \\\\
-            {new_lhs} &= {new_rhs}
-        \\end{{align*}}
-        """.format(coefficient = latex(coeff),
-                   variable = latex(x),
-                   old_lhs = latex(lhs),
-                   old_rhs = latex(rhs),
-                   new_lhs = latex(new_lhs),
-                   new_rhs = latex(new_rhs),
-                   ))
-        lhs = new_lhs
-        rhs = new_rhs
-
-    explanation += dedent("""\
-        The equation is in the form ${variable} = {value}$;
-        That is, the value of ${variable}$ is ${value}$.""".format(
-        variable = latex(x),
-        value = latex(rhs)))
-
-    return explanation
-
+    return linear_logic(expr,x)[0]
 
 # Exponential
 # Examples:
@@ -292,6 +293,35 @@ def system_of_linear_equations_solver(sub):
             return False
         if not i.lhs.diff(y).is_constant():
             return False
+
+    # Now that we know the structure of the equations,
+    # we can turn them into a worked-through solution.
+
+    lhs=[]
+    rhs=[]
+    coeff=[]
+    for i in expr:
+        lhs.append(i.lhs)
+        rhs.append(i.rhs)
+        coeff.append((lhs[-1].coeff(x),lhs[-1].coeff(y)))
+
+    new_coeff=[1]
+    new_coeff.extend(new_coeff[-1]*i[0] for i in coeff)
+    new_coeff=new_coeff[-1]
+    new_lhs=[lhs[i]*new_coeff/coeff[i][0] for i in range(len(coeff))]
+    new_rhs=[rhs[i]*new_coeff/coeff[i][0] for i in range(len(coeff))]
+
+    combined_lhs=new_lhs[0]-new_lhs[1]
+    combined_rhs=new_rhs[0]-new_rhs[1]
+    if combined_lhs.is_constant():
+        if (combined_lhs-combined_rhs).is_zero:
+            return "infinite solutions"
+        return "no solutions"
+
+    y_value=linear_logic(Eq(combined_lhs,combined_rhs),y)[1]
+    x_value=[linear_logic(i.subs(y,y_value),x)[1] for i in expr]
+    assert all(i==x_value[0] for i in x_value),"Deduced value for {x} should be equal for all expressions"
+    return str(x)+"="+str(x_value[0])+","+str(y)+"="+str(y_value)
 
 # Export solvers as a list
 equation_solvers = (linear_solver,
