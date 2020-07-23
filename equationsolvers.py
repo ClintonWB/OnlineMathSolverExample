@@ -399,10 +399,10 @@ def logarithm_solver(sub):
         return False
     if not expr.rhs.is_constant():
         return False
-    #need to update this
+    #theres probably a better way to do this.
     if not bool(expr.lhs.atoms(log)):#expr doesnt contains a logarithm
         return False
-    elif simplify(Abs(expr.lhs.atoms(log).pop().diff()/expr.lhs.diff()))!=1:
+    elif !(lhs.atoms(sympy.log).pop().diff()*lhs.atoms(sympy.log).pop().args[0]).is_constant():
         return False
 
     # Now that we know the structure of the equation,
@@ -482,7 +482,6 @@ def logarithm_solver(sub):
 
     return explanation+linear_solver(str(lhs)+"="+str(rhs))
 
-logarithm_solver("ln(3a+1)-1=3")
 # Square Roots
 # Examples:
 #     "sqrt(x+1)=2"
@@ -525,5 +524,3 @@ equation_solvers = (linear_solver,
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-logarithm_solver("log(3a+1)-1=1")
