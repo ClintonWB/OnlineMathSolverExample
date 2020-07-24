@@ -2,7 +2,7 @@
 from sympy import Eq, latex
 
 from sympy.parsing.sympy_parser import (parse_expr, convert_equals_signs,
-    implicit_multiplication, standard_transformations)
+    implicit_multiplication, standard_transformations,implicit_multiplication_application)
 from textwrap import dedent
 
 # Linear Equation Solver
@@ -245,9 +245,64 @@ def square_root_solver(sub):
 #    "y**2+1=0"
 #    "z**2+3z+2=0"
 def quadratic_solver(sub):
-    return False
+    # Check if SymPy can parse the expression as an equation
+    try:
+        expr = parse_expr(sub,
+                   transformations=(*standard_transformations,implicit_multiplication,
+                                    implicit_multiplication_application,
+                                    convert_equals_signs))
+    except (SyntaxError, ValueError):
+        return False
+    # Check if the expression is in 1 variable
+    variables = expr.free_symbols
+    if len(variables) != 1:
+        return False
+    x, = variables
 
+    # Check if it is a quadratic equation
+    if not isinstance(expr,Eq):
+        return False
+    if not expr.rhs.is_constant():
+        return False
+    if not expr.rhs == 0:
+        return False
+    if not expr.lhs.diff(x).diff(x).is_constant():
+        return False
+    if expr.lhs.diff(x).diff(x) == 0:
+        return False
+    explanation = dedent("""\
+    Let's solve the equation:
+    \\[
+        {expression}
+    \\]
+    """.format(expression=latex(expr)))
+    lhs = expr.lhs
+    rhs = expr.rhs
 
+    a_coeff = lhs.coeff(x,2)
+    b_coeff = lhs.coeff(x,1)
+    c_coeff = lhs.coeff(x,0)
+
+    explanation += dedent("""\
+    First we define the coefficients of the quadratic: a, b, c
+    \\begin{{align*}}
+        a = {a_coeff}\\\\
+        b = {b_coeff}\\\\
+        c = {c_coeff}\\\\
+    \\end{{align*}}
+    We can use these with the quadratic equation to solve for the roots!
+    """.format(a_coeff = latex(a_coeff),b_coeff=latex(b_coeff),c_coeff=latex(c_coeff),))
+
+    import math
+    x1 = -b_coeff+math.sqrt(b_coeff**2-4*a_coeff*c_coeff)/(2*a_coeff)
+    x2 = -b_coeff-math.sqrt(b_coeff**2-4*a_coeff*c_coeff)/(2*a_coeff)
+    explanation += dedent("""\
+    The roots of this quadratic equation are ${x1}$ and ${x2}$.""".format(
+    x1 = latex(x1),
+    x2 = latex(x2)
+    ))
+
+    return explanation
 # Systems of Linear Equations Solver
 # Examples:
 #     "a+2b = 1,a-b=3"
